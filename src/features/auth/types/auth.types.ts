@@ -1,0 +1,28 @@
+export interface RegisterRequest {
+    fName: String;
+    lName: string;
+    email: string;
+    password: string;
+}
+
+export interface User {
+    id: string;
+    fName: string;
+    lName: string;
+    email: string;
+    createdAt: string;
+}
+
+export interface Workspace {
+    id: string;
+    name: string;
+    slug: string;
+    type: "personal" | "team";
+    createdBy: string;
+}
+
+export interface RegisterResponse {
+    user: User;
+    workspace: Workspace;
+    token: string;
+}
