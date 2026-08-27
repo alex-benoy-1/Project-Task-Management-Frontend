@@ -50,70 +50,76 @@ export function RegisterForm() {
     };
 
     return (
-        <form onSubmit={ handleSubmit(onSubmit) }>
+        <form onSubmit={ handleSubmit(onSubmit) } className="space-y-5">
             <div>
-                <label htmlFor="fName">First name</label>
+                <label htmlFor="fName" className="mb-1 block text-sm font-medium">First name</label>
                 <input
                     id="fName"
                     type="text"
                     {...register("fName")}
+                    className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
                 />
                 { errors.fName && (
-                    <p>{ errors.fName.message }</p>
+                    <p className="mt-1 text-sm text-red-600">{ errors.fName.message }</p>
                 )}
             </div>
 
             <div>
-                <label htmlFor="lName">Last name</label>
+                <label htmlFor="lName" className="mb-1 block text-sm font-medium">Last name</label>
                 <input
                     id="lName"
                     type="text"
                     {...register("lName")}
+                    className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
                 />
                 { errors.lName && (
-                    <p>{ errors.lName.message }</p>
+                    <p className="mt-1 text-sm text-red-600">{ errors.lName.message }</p>
                 )}
             </div>
 
             <div>
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email" className="mb-1 block text-sm font-medium">Email</label>
                 <input
                     id="email"
                     type="email"
                     {...register("email")}
+                    className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
                 />
                 { errors.email && (
-                    <p>{ errors.email.message }</p>
+                    <p className="mt-1 text-sm text-red-600">{ errors.email.message }</p>
                 )}
             </div>
 
             <div>
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password" className="mb-1 block text-sm font-medium">Password</label>
                 <input
                     id="password"
                     type="password"
                     {...register("password")}
+                    className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
                 />
                 { errors.password && (
-                    <p>{ errors.password.message }</p>
+                    <p className="mt-1 text-sm text-red-600">{ errors.password.message }</p>
                 )}
             </div>
 
             <div>
-                <label htmlFor="confirmPassword">Confirm Password</label>
+                <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium">Confirm Password</label>
                 <input
                     id="confirmPassword"
                     type="password"
                     {...register("confirmPassword")}
+                    className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
                 />
                 { errors.confirmPassword && (
-                    <p>{ errors.confirmPassword.message }</p>
+                    <p className="mt-1 text-sm text-red-600">{ errors.confirmPassword.message }</p>
                 )}
             </div>
 
-            { serverError && <p>{ serverError }</p>}
+            { serverError && <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">{ serverError }</p>}
 
-            <button type="submit" disabled={isSubmitting}>
+            <button type="submit" disabled={isSubmitting}
+                className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
                 { isSubmitting ? "Creating account ..." : "Create account" }
             </button>
         </form>
