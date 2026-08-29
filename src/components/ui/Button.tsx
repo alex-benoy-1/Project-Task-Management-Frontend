@@ -3,13 +3,13 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children: ReactNode;
     variant?: "primary" | "secondary" | "danger" | "ghost";
-    fullwidth?: boolean;
+    fullWidth?: boolean;
 }
 
 export function Button({
     children,
     variant = "primary",
-    fullwidth = false,
+    fullWidth = false,
     className = "",
     ...props 
 }: ButtonProps) {
@@ -21,7 +21,7 @@ export function Button({
         ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
     };
 
-    const width = fullwidth ? "w-full" : "";
+    const width = fullWidth ? "w-full" : "";
 
     return(
         <button
