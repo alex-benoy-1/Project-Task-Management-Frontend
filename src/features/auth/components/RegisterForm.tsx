@@ -2,9 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "../../../components/ui/Button.tsx";
-import { Input } from "../../../components/ui/Input.tsx";
-import { FormField } from "../../../components/ui/FormField.tsx";
+import { Button, Input, FormField } from "../../../components/ui";
 
 import {
   registerSchema,
