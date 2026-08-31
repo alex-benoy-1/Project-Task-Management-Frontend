@@ -26,3 +26,21 @@ export interface RegisterResponse {
     workspace: Workspace;
     token: string;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginUser {
+  id: string;
+  fName: string;
+  lName: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface LoginResponse {
+  user: LoginUser;
+  token: string;
+}

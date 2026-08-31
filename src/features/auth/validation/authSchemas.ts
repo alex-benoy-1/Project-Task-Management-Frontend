@@ -30,4 +30,17 @@ export const registerSchema = z.object ({
     path: ["confirmPassword"],
 });
 
+export const loginSchema = z.object({
+  email: z
+    .email("Please enter a valid email address"),
+
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/[A-Z]/, "Must contain uppercase")
+    .regex(/[a-z]/, "Must contain lowercase")
+    .regex(/[0-9]/, "Must contain number"),
+});
+
 export type RegisterFormData = z.infer<typeof registerSchema>;
+export type LoginFormData = z.infer<typeof loginSchema>;
