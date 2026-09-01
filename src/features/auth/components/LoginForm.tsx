@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
 
 import { Button, FormField, Input } from "../../../components/ui";
 
@@ -12,6 +13,9 @@ import {
 } from "../validation/authSchemas";
 
 export function LoginForm() {
+
+  const navigate = useNavigate();
+
   const [serverError, setServerError] =
     useState<string | null>(null);
 
@@ -35,7 +39,9 @@ export function LoginForm() {
       console.log("User:", response.user);
       console.log("Token:", response.token);
 
-      // Authentication handling will go here.
+      localStorage.setItem("token", response.token);
+
+      navigate("/");
     } catch (error) {
       console.error(error);
 
