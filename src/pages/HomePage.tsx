@@ -1,16 +1,53 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { getMyOrganizations } from "../features/organizations/api/organizationApi";
+import { OrganizationCard } from "../features/organizations/components/OrganizationCard";
+import type { Organization } from "../features/organizations/types/organization.types";
 
 export function HomePage() {
   const navigate = useNavigate();
 
+  const [organizations, setOrganizations] =
+    useState<Organization[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const handleLogout = () => {
-    // We'll implement real logout later.
     localStorage.removeItem("token");
-    navigate("/login");
+
+    navigate("/login", {
+      replace: true,
+    });
   };
+
+  useEffect(() => {
+    const loadOrganizations = async () => {
+      try {
+        setIsLoading(true);
+
+        const response = await getMyOrganizations();
+
+        console.log("Organizations:", response.organizations);
+        console.log("Count:", response.count);
+
+        setOrganizations(response.organizations);
+      } catch (error) {
+        console.error(
+          "Failed to load organizations:",
+          error
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOrganizations();
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50">
+      {/* Header */}
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <h1 className="text-xl font-bold text-gray-900">
@@ -26,45 +63,62 @@ export function HomePage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <div className="rounded-xl border bg-white p-8 shadow-sm">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Welcome to Task Manager! 🎉
+      {/* Content */}
+      <section className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Your Organizations
           </h2>
 
-          <p className="mt-3 text-gray-600">
-            You have successfully reached the home page.
+          <p className="mt-1 text-gray-600">
+            Select an organization to manage your projects and tasks.
           </p>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg bg-gray-50 p-5">
-              <h3 className="font-semibold">
-                Organizations
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Manage your organizations
-              </p>
-            </div>
-
-            <div className="rounded-lg bg-gray-50 p-5">
-              <h3 className="font-semibold">
-                Projects
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Manage your projects
-              </p>
-            </div>
-
-            <div className="rounded-lg bg-gray-50 p-5">
-              <h3 className="font-semibold">
-                Tasks
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Manage your tasks
-              </p>
-            </div>
-          </div>
         </div>
+
+        {/* Loading */}
+        {isLoading && (
+          <p className="text-gray-500">
+            Loading organizations...
+          </p>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="rounded-lg bg-red-50 p-4">
+            <p className="text-sm text-red-600">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading &&
+          !error &&
+          organizations.length === 0 && (
+            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
+              <h3 className="font-semibold text-gray-900">
+                No organizations yet
+              </h3>
+
+              <p className="mt-2 text-sm text-gray-500">
+                You don't belong to any organizations yet.
+              </p>
+            </div>
+          )}
+
+        {/* Organizations */}
+        {!isLoading &&
+          !error &&
+          organizations.length > 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {organizations.map((organization) => (
+                <OrganizationCard
+                  key={organization.id}
+                  organization={organization}
+                />
+              ))}
+            </div>
+          )}
       </section>
     </main>
   );
