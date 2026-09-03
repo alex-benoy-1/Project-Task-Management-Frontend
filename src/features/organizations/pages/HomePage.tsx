@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { getMyOrganizations } from "../features/organizations/api/organizationApi";
-import { OrganizationCard } from "../features/organizations/components/OrganizationCard";
-import type { Organization } from "../features/organizations/types/organization.types";
+import { getMyOrganizations } from "../api/organizationApi";
+import { OrganizationCard } from "../components/OrganizationCard";
+import type { Organization } from "../types/organization.types";
 
 export function HomePage() {
   const navigate = useNavigate();
 
   const [organizations, setOrganizations] =
     useState<Organization[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [error, setError] = useState<string | null>(null);
 
   const handleLogout = () => {
@@ -25,6 +27,7 @@ export function HomePage() {
     const loadOrganizations = async () => {
       try {
         setIsLoading(true);
+        setError(null);
 
         const response = await getMyOrganizations();
 
@@ -36,6 +39,10 @@ export function HomePage() {
         console.error(
           "Failed to load organizations:",
           error
+        );
+
+        setError(
+          "Failed to load your organizations. Please try again."
         );
       } finally {
         setIsLoading(false);
@@ -65,25 +72,42 @@ export function HomePage() {
 
       {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Your Organizations
-          </h2>
+        {/* Page heading */}
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Your Organizations
+            </h2>
 
-          <p className="mt-1 text-gray-600">
-            Select an organization to manage your projects and tasks.
-          </p>
+            <p className="mt-1 text-gray-600">
+              Select an organization to manage your projects and tasks.
+            </p>
+          </div>
+
+          {/* Create button */}
+          <Link
+            to="/organizations/new"
+            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+          >
+            <span className="text-lg leading-none">
+              +
+            </span>
+
+            Create organization
+          </Link>
         </div>
 
         {/* Loading */}
         {isLoading && (
-          <p className="text-gray-500">
-            Loading organizations...
-          </p>
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <p className="text-sm text-gray-500">
+              Loading organizations...
+            </p>
+          </div>
         )}
 
         {/* Error */}
-        {error && (
+        {!isLoading && error && (
           <div className="rounded-lg bg-red-50 p-4">
             <p className="text-sm text-red-600">
               {error}
@@ -103,6 +127,17 @@ export function HomePage() {
               <p className="mt-2 text-sm text-gray-500">
                 You don't belong to any organizations yet.
               </p>
+
+              <Link
+                to="/organizations/new"
+                className="mt-5 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                <span className="text-lg leading-none">
+                  +
+                </span>
+
+                Create your first organization
+              </Link>
             </div>
           )}
 

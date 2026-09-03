@@ -10,3 +10,7 @@ export interface GetOrganizationsResponse {
   organizations: Organization[];
   count: number;
 }
+
+export interface CreateOrganizationRequest {
+  name: string;
+}
