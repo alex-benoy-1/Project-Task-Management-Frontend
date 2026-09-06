@@ -15,9 +15,9 @@ export function OrganizationCard({
             {organization.name}
           </h3>
 
-          <p className="mt-1 text-sm text-gray-500">
+          {/* <p className="mt-1 text-sm text-gray-500">
             {organization.slug}
-          </p>
+          </p> */}
         </div>
 
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-700">

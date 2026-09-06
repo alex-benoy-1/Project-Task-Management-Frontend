@@ -58,7 +58,7 @@ export function HomePage() {
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <h1 className="text-xl font-bold text-gray-900">
-            Task Manager
+            Project Manager
           </h1>
 
           <button
