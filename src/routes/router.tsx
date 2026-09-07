@@ -5,6 +5,7 @@ import { LoginPage } from "../features/auth/pages/LoginPage";
 
 import { HomePage } from "../features/organizations/pages/HomePage";
 import { CreateOrganizationPage } from "../features/organizations/pages/CreateOrganizationPage";
+import { ProjectsPage } from "../features/projects/pages/ProjectsPage.tsx";
 
 import { ProtectedRoute } from "../features/auth/components/ProtectedRoute";
 import { PublicRoute } from "../features/auth/components/PublicRoute.tsx";
@@ -41,5 +42,9 @@ export const router = createBrowserRouter([
         <RegisterPage />
       </PublicRoute>
     ),
+  },
+  {
+    path: "/organizations/:organizationId/projects",
+    element: <ProjectsPage />,
   },
 ]);
