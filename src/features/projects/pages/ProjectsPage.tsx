@@ -6,8 +6,8 @@ import { ProjectCard } from "../components/ProjectCard";
 import type { Project } from "../types/project.types";
 
 export function ProjectsPage() {
-  const { organizationId } = useParams<{
-    organizationId: string;
+  const { orgId } = useParams<{
+    orgId: string;
   }>();
 
   const [projects, setProjects] = useState<Project[]>([]);
@@ -15,7 +15,7 @@ export function ProjectsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!organizationId) {
+    if (!orgId) {
       setError("Organization not found.");
       setLoading(false);
       return;
@@ -26,33 +26,34 @@ export function ProjectsPage() {
         setLoading(true);
         setError(null);
 
-        const data =
-          await getOrganizationProjects(
-            organizationId,
-          );
+        const response =
+          await getOrganizationProjects(orgId);
 
-        setProjects(data);
+        console.log(
+          "Projects:",
+          response.projects,
+        );
+
+        setProjects(response.projects);
       } catch (error) {
         console.error(
           "Failed to load projects:",
           error,
         );
 
-        setError(
-          "Unable to load projects.",
-        );
+        setError("Unable to load projects.");
       } finally {
         setLoading(false);
       }
     };
 
     loadProjects();
-  }, [organizationId]);
+  }, [orgId]);
 
   return (
     <main className="min-h-screen bg-gray-50">
       <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center px-6 py-4">
+        <div className="mx-auto max-w-7xl px-6 py-4">
           <Link
             to="/"
             className="text-sm font-medium text-gray-600 hover:text-gray-900"
@@ -69,7 +70,7 @@ export function ProjectsPage() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Projects belonging to this organization.
+            Projects in this organization.
           </p>
         </div>
 
@@ -96,8 +97,8 @@ export function ProjectsPage() {
               </h2>
 
               <p className="mt-2 text-sm text-gray-500">
-                This organization doesn't have any
-                projects yet.
+                This organization doesn't have
+                any projects yet.
               </p>
             </div>
           )}
@@ -108,7 +109,7 @@ export function ProjectsPage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
                 <ProjectCard
-                  key={project.id}
+                  key={project.projectid}
                   project={project}
                 />
               ))}

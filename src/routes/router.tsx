@@ -44,7 +44,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/organizations/:organizationId/projects",
+    path: "/organizations/:orgId/projects",
     element: <ProjectsPage />,
   },
 ]);
