@@ -111,6 +111,14 @@ export function ProjectsPage() {
                 <ProjectCard
                   key={project.projectid}
                   project={project}
+                  onDelete={(projectId) => {
+                    setProjects((currentProjects) =>
+                      currentProjects.filter(
+                        (currentProject) =>
+                          currentProject.projectid !== projectId,
+                      ),
+                    );
+                  }}
                 />
               ))}
             </div>

@@ -12,3 +12,13 @@ export const getOrganizationProjects = async (
 
   return response.data;
 };
+
+export const deleteProject = async (
+  projectId: string,
+) => {
+  const response = await api.delete(
+    `/projects/${projectId}`,
+  );
+
+  return response.data;
+};
