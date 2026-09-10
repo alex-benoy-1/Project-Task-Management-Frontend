@@ -1,5 +1,10 @@
 import { api } from "../../../lib/api/client";
-import type { GetProjectsResponse } from "../types/project.types";
+
+import type {
+  CreateProjectRequest,
+  CreateProjectResponse,
+  GetProjectsResponse,
+} from "../types/project.types";
 
 export const getOrganizationProjects = async (
   orgId: string,
@@ -8,7 +13,17 @@ export const getOrganizationProjects = async (
     `/projects/organization/${orgId}`,
   );
 
-  console.log("Projects API response:", response.data);
+  return response.data;
+};
+
+export const createProject = async (
+  orgId: string,
+  data: CreateProjectRequest,
+): Promise<CreateProjectResponse> => {
+  const response = await api.post<CreateProjectResponse>(
+    `/projects/organization/${orgId}`,
+    data,
+  );
 
   return response.data;
 };

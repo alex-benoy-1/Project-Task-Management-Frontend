@@ -14,3 +14,18 @@ export interface GetProjectsResponse {
   projects: Project[];
   count: number;
 }
+
+export interface CreateProjectRequest {
+  name: string;
+  description: string;
+}
+
+export interface CreateProjectResponse {
+  project: {
+    id: string;
+    organizations: string;
+    name: string;
+    description: string;
+    role: string;
+  };
+}

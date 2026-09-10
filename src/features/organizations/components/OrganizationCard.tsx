@@ -11,7 +11,9 @@ export function OrganizationCard({
   return (
     <Link
       to={`/organizations/${organization.id}/projects`}
-      className="block"
+      state={{
+        organizationRole: organization.role,
+      }}
     >
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md">
         <div className="flex items-start justify-between gap-4">
