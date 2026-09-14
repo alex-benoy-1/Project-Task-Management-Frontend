@@ -13,6 +13,7 @@ export function OrganizationCard({
       to={`/organizations/${organization.id}/projects`}
       state={{
         organizationRole: organization.role,
+        organizationName: organization.name,
       }}
     >
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md">

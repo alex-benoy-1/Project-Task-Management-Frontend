@@ -3,3 +3,4 @@ export { Card } from "./Card";
 export { FormField } from "./FormField";
 export { Input } from "./Input";
 export { Modal } from "./Modal";
+export { Breadcrumbs } from "./BreadCrumbs";

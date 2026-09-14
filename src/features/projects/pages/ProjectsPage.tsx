@@ -4,7 +4,11 @@ import {
   useParams,
 } from "react-router-dom";
 
-import { Button, Modal } from "../../../components/ui";
+import {
+  Breadcrumbs,
+  Button,
+  Modal,
+} from "../../../components/ui";
 
 import {
   createProject,
@@ -18,6 +22,7 @@ import { ProjectForm } from "../components/ProjectForm";
 
 interface LocationState {
   organizationRole?: string;
+  organizationName?: string;
 }
 
 export function ProjectsPage() {
@@ -31,6 +36,10 @@ export function ProjectsPage() {
 
   const organizationRole =
     locationState?.organizationRole;
+
+  const organizationName =
+    locationState?.organizationName ??
+    "Organization";
 
   const [projects, setProjects] = useState<
     Project[]
@@ -51,12 +60,7 @@ export function ProjectsPage() {
     useState("");
 
   /*
-   * Backend:
-   *
-   * requireRole("admin", "manager")
-   *
-   * Only admin and manager should see
-   * the Create Project button.
+   * Only admin and manager can create projects.
    */
   const canCreateProject =
     organizationRole === "admin" ||
@@ -127,20 +131,8 @@ export function ProjectsPage() {
       );
 
       /*
-       * The current backend create response is:
-       *
-       * {
-       *   project: {
-       *     id,
-       *     organizations,
-       *     name,
-       *     description,
-       *     role
-       *   }
-       * }
-       *
-       * Convert it to the Project shape
-       * used by ProjectCard.
+       * Convert backend response
+       * into Project shape.
        */
       const newProject: Project = {
         projectid: response.project.id,
@@ -190,7 +182,7 @@ export function ProjectsPage() {
   };
 
   /*
-   * Remove deleted project from the page
+   * Remove deleted project from page
    */
   const handleProjectDelete = (
     projectId: string,
@@ -243,7 +235,7 @@ export function ProjectsPage() {
       {/* =========================
           Page Header
       ========================== */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             Projects
@@ -266,6 +258,21 @@ export function ProjectsPage() {
           </Button>
         )}
       </div>
+
+      {/* =========================
+          Breadcrumbs
+      ========================== */}
+      <Breadcrumbs
+        items={[
+          {
+            label: "Home",
+            href: "/",
+          },
+          {
+            label: organizationName,
+          },
+        ]}
+      />
 
       {/* =========================
           Projects
