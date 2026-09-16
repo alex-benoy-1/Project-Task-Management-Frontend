@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getMyOrganizations } from "../api/organizationApi";
 import { OrganizationCard } from "../components/OrganizationCard";
 import type { Organization } from "../types/organization.types";
+import { Breadcrumbs } from "../../../components/ui";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -72,6 +73,7 @@ export function HomePage() {
 
       {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
+        
         {/* Page heading */}
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
@@ -96,7 +98,16 @@ export function HomePage() {
             Create organization
           </Link>
         </div>
-
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              {
+                label: "Home",
+              },
+            ]}
+          />
+        </div>
         {/* Loading */}
         {isLoading && (
           <div className="rounded-xl border border-gray-200 bg-white p-6">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   useLocation,
+  useNavigate,
   useParams,
 } from "react-router-dom";
 
@@ -26,10 +27,10 @@ interface LocationState {
 }
 
 export function ProjectsPage() {
-  const { orgId } =
-    useParams<{ orgId: string }>();
+  const { orgId } = useParams<{ orgId: string }>();
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const locationState =
     location.state as LocationState | null;
@@ -38,33 +39,35 @@ export function ProjectsPage() {
     locationState?.organizationRole;
 
   const organizationName =
-    locationState?.organizationName ??
-    "Organization";
+    locationState?.organizationName ?? "Organization";
 
-  const [projects, setProjects] = useState<
-    Project[]
-  >([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [error, setError] = useState("");
 
   const [showCreateModal, setShowCreateModal] =
     useState(false);
 
-  const [isCreating, setIsCreating] =
-    useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
-  const [createError, setCreateError] =
-    useState("");
+  const [createError, setCreateError] = useState("");
 
-  /*
-   * Only admin and manager can create projects.
-   */
   const canCreateProject =
     organizationRole === "admin" ||
     organizationRole === "manager";
+
+  /*
+   * Logout
+   */
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
 
   /*
    * Fetch projects
@@ -72,12 +75,8 @@ export function ProjectsPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       if (!orgId) {
-        setError(
-          "Organization ID is missing.",
-        );
-
+        setError("Organization ID is missing.");
         setIsLoading(false);
-
         return;
       }
 
@@ -92,11 +91,11 @@ export function ProjectsPage() {
       } catch (error) {
         console.error(
           "Failed to fetch projects:",
-          error,
+          error
         );
 
         setError(
-          "Failed to load projects. Please try again.",
+          "Failed to load projects. Please try again."
         );
       } finally {
         setIsLoading(false);
@@ -114,10 +113,7 @@ export function ProjectsPage() {
     description: string;
   }) => {
     if (!orgId) {
-      setCreateError(
-        "Organization ID is missing.",
-      );
-
+      setCreateError("Organization ID is missing.");
       return;
     }
 
@@ -127,13 +123,9 @@ export function ProjectsPage() {
 
       const response = await createProject(
         orgId,
-        data,
+        data
       );
 
-      /*
-       * Convert backend response
-       * into Project shape.
-       */
       const newProject: Project = {
         projectid: response.project.id,
 
@@ -145,36 +137,31 @@ export function ProjectsPage() {
         description:
           response.project.description,
 
-        created_at:
-          new Date().toISOString(),
+        created_at: new Date().toISOString(),
 
-        updated_at:
-          new Date().toISOString(),
+        updated_at: new Date().toISOString(),
 
         user_id: "",
 
         role: response.project.role,
 
-        joined:
-          new Date().toISOString(),
+        joined: new Date().toISOString(),
       };
 
-      setProjects(
-        (currentProjects) => [
-          ...currentProjects,
-          newProject,
-        ],
-      );
+      setProjects((currentProjects) => [
+        ...currentProjects,
+        newProject,
+      ]);
 
       setShowCreateModal(false);
     } catch (error) {
       console.error(
         "Failed to create project:",
-        error,
+        error
       );
 
       setCreateError(
-        "Failed to create project. Please try again.",
+        "Failed to create project. Please try again."
       );
     } finally {
       setIsCreating(false);
@@ -184,125 +171,144 @@ export function ProjectsPage() {
   /*
    * Remove deleted project from page
    */
-  const handleProjectDelete = (
-    projectId: string,
-  ) => {
-    setProjects(
-      (currentProjects) =>
-        currentProjects.filter(
-          (project) =>
-            project.projectid !== projectId,
-        ),
+  const handleProjectDelete = (projectId: string) => {
+    setProjects((currentProjects) =>
+      currentProjects.filter(
+        (project) =>
+          project.projectid !== projectId
+      )
     );
   };
 
-  /*
-   * Loading
-   */
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="flex min-h-[300px] items-center justify-center">
-          <p className="text-sm text-gray-500">
-            Loading projects...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  /*
-   * Error
-   */
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-          <h2 className="font-semibold text-red-800">
-            Something went wrong
-          </h2>
-
-          <p className="mt-2 text-sm text-red-600">
-            {error}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6">
-      {/* =========================
-          Page Header
-      ========================== */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Projects
+    <main className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="border-b bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <h1 className="text-xl font-bold text-gray-900">
+            Project Manager
           </h1>
 
-          <p className="mt-1 text-sm text-gray-600">
-            Manage your organization's projects.
-          </p>
-        </div>
-
-        {canCreateProject && (
-          <Button
-            type="button"
-            onClick={() => {
-              setCreateError("");
-              setShowCreateModal(true);
-            }}
+          <button
+            onClick={handleLogout}
+            className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
-            + Create Project
-          </Button>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* Content */}
+      <section className="mx-auto max-w-7xl px-6 py-10">
+
+        {/* Page Heading */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Projects
+            </h2>
+
+            <p className="mt-1 text-gray-600">
+              Manage your organization's projects.
+            </p>
+          </div>
+
+          {canCreateProject && (
+            <Button
+              type="button"
+              onClick={() => {
+                setCreateError("");
+                setShowCreateModal(true);
+              }}
+            >
+              + Create Project
+            </Button>
+          )}
+        </div>
+
+        {/* Breadcrumbs */}
+        <div className="mb-8">
+          <Breadcrumbs
+            items={[
+              {
+                label: "Home",
+                href: "/",
+              },
+              {
+                label: organizationName,
+              },
+            ]}
+          />
+        </div>
+
+        {/* Loading */}
+        {isLoading && (
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <p className="text-sm text-gray-500">
+              Loading projects...
+            </p>
+          </div>
         )}
-      </div>
 
-      {/* =========================
-          Breadcrumbs
-      ========================== */}
-      <Breadcrumbs
-        items={[
-          {
-            label: "Home",
-            href: "/",
-          },
-          {
-            label: organizationName,
-          },
-        ]}
-      />
+        {/* Error */}
+        {!isLoading && error && (
+          <div className="rounded-lg bg-red-50 p-4">
+            <p className="text-sm text-red-600">
+              {error}
+            </p>
+          </div>
+        )}
 
-      {/* =========================
-          Projects
-      ========================== */}
-      {projects.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
-          <h2 className="text-lg font-semibold text-gray-900">
-            No projects yet
-          </h2>
+        {/* Empty State */}
+        {!isLoading &&
+          !error &&
+          projects.length === 0 && (
+            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
+              <h3 className="font-semibold text-gray-900">
+                No projects yet
+              </h3>
 
-          <p className="mt-2 text-sm text-gray-600">
-            There are no projects in this
-            organization yet.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.projectid}
-              project={project}
-              onDelete={handleProjectDelete}
-            />
-          ))}
-        </div>
-      )}
+              <p className="mt-2 text-sm text-gray-500">
+                There are no projects in this
+                organization yet.
+              </p>
 
-      {/* =========================
-          Create Project Modal
-      ========================== */}
+              {canCreateProject && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateError("");
+                    setShowCreateModal(true);
+                  }}
+                  className="mt-5 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  <span className="text-lg leading-none">
+                    +
+                  </span>
+
+                  Create your first project
+                </button>
+              )}
+            </div>
+          )}
+
+        {/* Projects */}
+        {!isLoading &&
+          !error &&
+          projects.length > 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.projectid}
+                  project={project}
+                  onDelete={handleProjectDelete}
+                />
+              ))}
+            </div>
+          )}
+      </section>
+
+      {/* Create Project Modal */}
       {showCreateModal && (
         <Modal
           title="Create Project"
@@ -329,6 +335,6 @@ export function ProjectsPage() {
           />
         </Modal>
       )}
-    </div>
+    </main>
   );
 }
