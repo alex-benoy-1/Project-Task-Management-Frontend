@@ -12,7 +12,7 @@ export function LoginPage() {
       >
         <LoginForm />
 
-        <div className="mt-4 text-right">
+        <div className="mt-4 text-center">
           <Link
             to="/forgot-password"
             className="text-sm font-medium text-blue-600 hover:underline"
