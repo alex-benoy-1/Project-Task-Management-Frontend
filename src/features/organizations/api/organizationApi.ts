@@ -9,18 +9,28 @@ import type {
 export const getMyOrganizations =
   async (): Promise<GetOrganizationsResponse> => {
     const response = await api.get<GetOrganizationsResponse>(
-      "/organizations"
+      "/organizations",
     );
 
     return response.data;
   };
 
 export const createOrganization = async (
-  data: CreateOrganizationRequest
+  data: CreateOrganizationRequest,
 ): Promise<Organization> => {
   const response = await api.post<Organization>(
     "/organizations/",
-    data
+    data,
+  );
+
+  return response.data;
+};
+
+export const deleteOrganization = async (
+  organizationId: string,
+) => {
+  const response = await api.delete(
+    `/organizations/${organizationId}`,
   );
 
   return response.data;

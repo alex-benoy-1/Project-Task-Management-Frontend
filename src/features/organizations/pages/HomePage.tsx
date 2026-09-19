@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getMyOrganizations } from "../api/organizationApi";
 import { OrganizationCard } from "../components/OrganizationCard";
 import type { Organization } from "../types/organization.types";
+
 import { Breadcrumbs } from "../../../components/ui";
 
 export function HomePage() {
@@ -24,6 +25,17 @@ export function HomePage() {
     });
   };
 
+  const handleOrganizationDelete = (
+    organizationId: string,
+  ) => {
+    setOrganizations((currentOrganizations) =>
+      currentOrganizations.filter(
+        (organization) =>
+          organization.id !== organizationId,
+      ),
+    );
+  };
+
   useEffect(() => {
     const loadOrganizations = async () => {
       try {
@@ -32,18 +44,22 @@ export function HomePage() {
 
         const response = await getMyOrganizations();
 
-        console.log("Organizations:", response.organizations);
+        console.log(
+          "Organizations:",
+          response.organizations,
+        );
+
         console.log("Count:", response.count);
 
         setOrganizations(response.organizations);
       } catch (error) {
         console.error(
           "Failed to load organizations:",
-          error
+          error,
         );
 
         setError(
-          "Failed to load your organizations. Please try again."
+          "Failed to load your organizations. Please try again.",
         );
       } finally {
         setIsLoading(false);
@@ -63,6 +79,7 @@ export function HomePage() {
           </h1>
 
           <button
+            type="button"
             onClick={handleLogout}
             className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
@@ -73,7 +90,6 @@ export function HomePage() {
 
       {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
-        
         {/* Page heading */}
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
@@ -82,7 +98,8 @@ export function HomePage() {
             </h2>
 
             <p className="mt-1 text-gray-600">
-              Select an organization to manage your projects and tasks.
+              Select an organization to manage your
+              projects and tasks.
             </p>
           </div>
 
@@ -98,6 +115,7 @@ export function HomePage() {
             Create organization
           </Link>
         </div>
+
         {/* Breadcrumbs */}
         <div className="mb-6">
           <Breadcrumbs
@@ -108,6 +126,7 @@ export function HomePage() {
             ]}
           />
         </div>
+
         {/* Loading */}
         {isLoading && (
           <div className="rounded-xl border border-gray-200 bg-white p-6">
@@ -161,6 +180,7 @@ export function HomePage() {
                 <OrganizationCard
                   key={organization.id}
                   organization={organization}
+                  onDelete={handleOrganizationDelete}
                 />
               ))}
             </div>
