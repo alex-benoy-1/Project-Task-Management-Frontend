@@ -9,7 +9,7 @@ import { ProjectsPage } from "../features/projects/pages/ProjectsPage.tsx";
 
 import { ProtectedRoute } from "../features/auth/components/ProtectedRoute";
 import { PublicRoute } from "../features/auth/components/PublicRoute.tsx";
-
+import { ProjectEditPage } from "../features/projects/pages/ProjectEditPage.tsx";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -47,4 +47,12 @@ export const router = createBrowserRouter([
     path: "/organizations/:orgId/projects",
     element: <ProjectsPage />,
   },
+  {
+  path: "/projects/:projectId/edit",
+  element: (
+    <ProtectedRoute>
+      <ProjectEditPage />
+    </ProtectedRoute>
+  ),
+},
 ]);

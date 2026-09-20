@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import type { Project } from "../types/project.types";
 import { deleteProject } from "../api/projectApi";
 
@@ -11,15 +13,26 @@ export function ProjectCard({
   project,
   onDelete,
 }: ProjectCardProps) {
-  const [showOptions, setShowOptions] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
+
+  const [showOptions, setShowOptions] =
+    useState(false);
+
+  const [isDeleting, setIsDeleting] =
+    useState(false);
 
   const canShowOptions =
     project.role === "owner" ||
     project.role === "admin" ||
     project.role === "manager";
 
+  const canEdit = project.role === "owner";
+
   const canDelete = project.role === "owner";
+
+  const handleEdit = () => {
+    navigate(`/projects/${project.projectid}/edit`);
+  };
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
@@ -37,7 +50,14 @@ export function ProjectCard({
 
       onDelete(project.projectid);
     } catch (error) {
-      console.error("Failed to delete project:", error);
+      console.error(
+        "Failed to delete project:",
+        error,
+      );
+
+      window.alert(
+        "Failed to delete project. Please try again.",
+      );
     } finally {
       setIsDeleting(false);
       setShowOptions(false);
@@ -62,16 +82,29 @@ export function ProjectCard({
             <button
               type="button"
               onClick={() =>
-                setShowOptions((previous) => !previous)
+                setShowOptions(
+                  (previous) => !previous,
+                )
               }
               className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
               aria-label="Project options"
+              aria-expanded={showOptions}
             >
               ⋮
             </button>
 
             {showOptions && (
               <div className="absolute right-0 z-10 mt-2 w-36 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={handleEdit}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Edit
+                  </button>
+                )}
+
                 {canDelete && (
                   <button
                     type="button"
@@ -79,7 +112,9 @@ export function ProjectCard({
                     disabled={isDeleting}
                     className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isDeleting ? "Deleting..." : "Delete"}
+                    {isDeleting
+                      ? "Deleting..."
+                      : "Delete"}
                   </button>
                 )}
               </div>
@@ -91,7 +126,9 @@ export function ProjectCard({
       <div className="mt-5 border-t pt-4">
         <p className="text-xs text-gray-500">
           Created:{" "}
-          {new Date(project.created_at).toLocaleDateString()}
+          {new Date(
+            project.created_at,
+          ).toLocaleDateString()}
         </p>
       </div>
     </div>
