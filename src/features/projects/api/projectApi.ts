@@ -17,6 +17,16 @@ export const getOrganizationProjects = async (
   return response.data;
 };
 
+export const getProject = async (
+  projectId: string,
+): Promise<Project> => {
+  const response = await api.get<Project>(
+    `/projects/${projectId}`,
+  );
+
+  return response.data;
+};
+
 export const createProject = async (
   orgId: string,
   data: CreateProjectRequest,

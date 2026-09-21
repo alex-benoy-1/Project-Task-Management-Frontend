@@ -10,7 +10,7 @@ import {
 } from "../../../components/ui";
 
 import {
-//   getProject,
+  getProject,
   updateProject,
 } from "../api/projectApi";
 
@@ -50,26 +50,26 @@ export function ProjectEditPage() {
         return;
       }
 
-    //   try {
-    //     setIsLoading(true);
-    //     setError(null);
+      try {
+        setIsLoading(true);
+        setError(null);
 
-    //     const response =
-    //       await getProject(projectId);
+        const response =
+          await getProject(projectId);
 
-    //     setProject(response);
-    //   } catch (error) {
-    //     console.error(
-    //       "Failed to load project:",
-    //       error,
-    //     );
+        setProject(response);
+      } catch (error) {
+        console.error(
+          "Failed to load project:",
+          error,
+        );
 
-    //     setError(
-    //       "Failed to load project. Please try again.",
-    //     );
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
+        setError(
+          "Failed to load project. Please try again.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadProject();
