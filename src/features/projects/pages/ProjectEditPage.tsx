@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
@@ -17,8 +18,12 @@ import {
 import { ProjectEditForm } from "../components/ProjectEditForm";
 
 import type { Project } from "../types/project.types";
-
 import type { ProjectFormData } from "../validation/projectSchema";
+
+interface LocationState {
+  organizationRole?: string;
+  organizationName?: string;
+}
 
 export function ProjectEditPage() {
   const { projectId } = useParams<{
@@ -26,6 +31,10 @@ export function ProjectEditPage() {
   }>();
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const locationState =
+    location.state as LocationState | null;
 
   const [project, setProject] =
     useState<Project | null>(null);
@@ -97,6 +106,17 @@ export function ProjectEditPage() {
 
       navigate(
         `/organizations/${updatedProject.organization_id}/projects`,
+        {
+          state: {
+            organizationRole:
+              locationState?.organizationRole ??
+              updatedProject.role,
+
+            organizationName:
+              locationState?.organizationName ??
+              "Organization",
+          },
+        },
       );
     } catch (error) {
       console.error(
@@ -116,6 +136,17 @@ export function ProjectEditPage() {
     if (project) {
       navigate(
         `/organizations/${project.organization_id}/projects`,
+        {
+          state: {
+            organizationRole:
+              locationState?.organizationRole ??
+              project.role,
+
+            organizationName:
+              locationState?.organizationName ??
+              "Organization",
+          },
+        },
       );
     } else {
       navigate(-1);

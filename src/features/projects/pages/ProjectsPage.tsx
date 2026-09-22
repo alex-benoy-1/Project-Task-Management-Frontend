@@ -27,7 +27,9 @@ interface LocationState {
 }
 
 export function ProjectsPage() {
-  const { orgId } = useParams<{ orgId: string }>();
+  const { orgId } = useParams<{
+    orgId: string;
+  }>();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,22 +41,29 @@ export function ProjectsPage() {
     locationState?.organizationRole;
 
   const organizationName =
-    locationState?.organizationName ?? "Organization";
+    locationState?.organizationName ??
+    "Organization";
 
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] =
+    useState<Project[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] =
+    useState(true);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
   const [showCreateModal, setShowCreateModal] =
     useState(false);
 
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreating, setIsCreating] =
+    useState(false);
 
-  const [createError, setCreateError] = useState("");
+  const [createError, setCreateError] =
+    useState("");
 
   const canCreateProject =
+    organizationRole === "owner" ||
     organizationRole === "admin" ||
     organizationRole === "manager";
 
@@ -91,11 +100,11 @@ export function ProjectsPage() {
       } catch (error) {
         console.error(
           "Failed to fetch projects:",
-          error
+          error,
         );
 
         setError(
-          "Failed to load projects. Please try again."
+          "Failed to load projects. Please try again.",
         );
       } finally {
         setIsLoading(false);
@@ -113,7 +122,9 @@ export function ProjectsPage() {
     description: string;
   }) => {
     if (!orgId) {
-      setCreateError("Organization ID is missing.");
+      setCreateError(
+        "Organization ID is missing.",
+      );
       return;
     }
 
@@ -123,7 +134,7 @@ export function ProjectsPage() {
 
       const response = await createProject(
         orgId,
-        data
+        data,
       );
 
       const newProject: Project = {
@@ -137,31 +148,36 @@ export function ProjectsPage() {
         description:
           response.project.description,
 
-        created_at: new Date().toISOString(),
+        created_at:
+          new Date().toISOString(),
 
-        updated_at: new Date().toISOString(),
+        updated_at:
+          new Date().toISOString(),
 
         user_id: "",
 
         role: response.project.role,
 
-        joined: new Date().toISOString(),
+        joined:
+          new Date().toISOString(),
       };
 
-      setProjects((currentProjects) => [
-        ...currentProjects,
-        newProject,
-      ]);
+      setProjects(
+        (currentProjects) => [
+          ...currentProjects,
+          newProject,
+        ],
+      );
 
       setShowCreateModal(false);
     } catch (error) {
       console.error(
         "Failed to create project:",
-        error
+        error,
       );
 
       setCreateError(
-        "Failed to create project. Please try again."
+        "Failed to create project. Please try again.",
       );
     } finally {
       setIsCreating(false);
@@ -171,12 +187,16 @@ export function ProjectsPage() {
   /*
    * Remove deleted project from page
    */
-  const handleProjectDelete = (projectId: string) => {
-    setProjects((currentProjects) =>
-      currentProjects.filter(
-        (project) =>
-          project.projectid !== projectId
-      )
+  const handleProjectDelete = (
+    projectId: string,
+  ) => {
+    setProjects(
+      (currentProjects) =>
+        currentProjects.filter(
+          (project) =>
+            project.projectid !==
+            projectId,
+        ),
     );
   };
 
@@ -190,6 +210,7 @@ export function ProjectsPage() {
           </h1>
 
           <button
+            type="button"
             onClick={handleLogout}
             className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
@@ -200,7 +221,6 @@ export function ProjectsPage() {
 
       {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
-
         {/* Page Heading */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -209,7 +229,8 @@ export function ProjectsPage() {
             </h2>
 
             <p className="mt-1 text-gray-600">
-              Manage your organization's projects.
+              Manage your organization's
+              projects.
             </p>
           </div>
 
@@ -301,7 +322,9 @@ export function ProjectsPage() {
                 <ProjectCard
                   key={project.projectid}
                   project={project}
-                  onDelete={handleProjectDelete}
+                  onDelete={
+                    handleProjectDelete
+                  }
                 />
               ))}
             </div>

@@ -31,7 +31,15 @@ export function ProjectCard({
   const canDelete = project.role === "owner";
 
   const handleEdit = () => {
-    navigate(`/projects/${project.projectid}/edit`);
+  navigate(
+    `/projects/${project.projectid}/edit`,
+    {
+      state: {
+        organizationRole: project.role,
+      },
+    },
+  );
+
   };
 
   const handleDelete = async () => {
