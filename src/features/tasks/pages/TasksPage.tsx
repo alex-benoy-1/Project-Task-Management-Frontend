@@ -141,12 +141,13 @@ export function TasksPage() {
         )}
 
         <div className="mt-8">
-          <Link
-            to="/"
-            className="text-sm font-medium text-blue-600 hover:text-blue-700"
-          >
-            ← Back to organizations
-          </Link>
+            <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                >
+                ← Back to projects
+            </button>
         </div>
       </section>
     </main>
