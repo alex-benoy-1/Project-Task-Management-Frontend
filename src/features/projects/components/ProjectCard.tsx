@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import type { Project } from "../types/project.types";
 import { deleteProject } from "../api/projectApi";
@@ -132,11 +132,16 @@ export function ProjectCard({
       </div>
 
       <div className="mt-5 border-t pt-4">
-        <p className="text-xs text-gray-500">
+        <Link
+          to={`/projects/${project.projectid}/tasks`}
+          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          View tasks →
+        </Link>
+
+        <p className="mt-2 text-xs text-gray-500">
           Created:{" "}
-          {new Date(
-            project.created_at,
-          ).toLocaleDateString()}
+          {new Date(project.created_at).toLocaleDateString()}
         </p>
       </div>
     </div>

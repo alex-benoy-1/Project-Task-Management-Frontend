@@ -9,6 +9,8 @@ import { CreateOrganizationPage } from "../features/organizations/pages/CreateOr
 import { ProjectsPage } from "../features/projects/pages/ProjectsPage";
 import { ProjectEditPage } from "../features/projects/pages/ProjectEditPage";
 
+import { TasksPage } from "../features/tasks/pages/TasksPage";
+
 import { ProtectedRoute } from "../features/auth/components/ProtectedRoute";
 import { PublicRoute } from "../features/auth/components/PublicRoute";
 
@@ -66,4 +68,12 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+  path: "/projects/:projectId/tasks",
+  element: (
+    <ProtectedRoute>
+      <TasksPage />
+    </ProtectedRoute>
+  ),
+},
 ]);
