@@ -10,8 +10,15 @@ import {
   Card,
 } from "../../../components/ui";
 
-import { getProjectTasks } from "../api/taskApi";
+import {
+  getProject,
+} from "../../projects/api/projectApi";
 
+import {
+  getProjectTasks,
+} from "../api/taskApi";
+
+import type { Project } from "../../projects/types/project.types";
 import type { Task } from "../types/task.types";
 
 export function TasksPage() {
@@ -21,7 +28,11 @@ export function TasksPage() {
 
   const navigate = useNavigate();
 
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [project, setProject] =
+    useState<Project | null>(null);
+
+  const [tasks, setTasks] =
+    useState<Task[]>([]);
 
   const [isLoading, setIsLoading] =
     useState(true);
@@ -41,10 +52,10 @@ export function TasksPage() {
   };
 
   /*
-   * Fetch tasks
+   * Fetch project and tasks
    */
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchProjectAndTasks = async () => {
       if (!projectId) {
         setError("Project ID is missing.");
         setIsLoading(false);
@@ -55,13 +66,29 @@ export function TasksPage() {
         setIsLoading(true);
         setError("");
 
-        const response =
+        /*
+         * First get the project.
+         *
+         * This gives us:
+         * - project name
+         * - organization ID
+         */
+        const projectResponse =
+          await getProject(projectId);
+
+        setProject(projectResponse);
+
+        /*
+         * Then get the tasks belonging
+         * to this project.
+         */
+        const tasksResponse =
           await getProjectTasks(projectId);
 
-        setTasks(response.tasks);
+        setTasks(tasksResponse.tasks);
       } catch (error) {
         console.error(
-          "Failed to fetch tasks:",
+          "Failed to load project tasks:",
           error,
         );
 
@@ -73,14 +100,21 @@ export function TasksPage() {
       }
     };
 
-    fetchTasks();
+    fetchProjectAndTasks();
   }, [projectId]);
 
   /*
    * Back to projects
    */
   const handleBackToProjects = () => {
-    navigate(-1);
+    if (!project) {
+      navigate(-1);
+      return;
+    }
+
+    navigate(
+      `/organizations/${project.organization_id}/projects`,
+    );
   };
 
   return (
@@ -112,7 +146,9 @@ export function TasksPage() {
             </h2>
 
             <p className="mt-1 text-gray-600">
-              Manage this project's tasks.
+              {project
+                ? `Manage tasks for ${project.name}.`
+                : "Manage this project's tasks."}
             </p>
           </div>
 
@@ -128,21 +164,43 @@ export function TasksPage() {
 
         {/* Breadcrumbs */}
         <div className="mb-8">
-          <Breadcrumbs
-            items={[
-              {
-                label: "Home",
-                href: "/",
-              },
-              {
-                label: "Projects",
-                href: "#",
-              },
-              {
-                label: "Tasks",
-              },
-            ]}
-          />
+          {!isLoading && project ? (
+            <Breadcrumbs
+              items={[
+                {
+                  label: "Home",
+                  href: "/",
+                },
+                {
+                  label: "Projects",
+                  href: `/organizations/${project.organization_id}/projects`,
+                },
+                {
+                  label: project.name,
+                  // You can make this clickable later
+                  // if you create a project details page.
+                },
+                {
+                  label: "Tasks",
+                },
+              ]}
+            />
+          ) : (
+            <Breadcrumbs
+              items={[
+                {
+                  label: "Home",
+                  href: "/",
+                },
+                {
+                  label: "Projects",
+                },
+                {
+                  label: "Tasks",
+                },
+              ]}
+            />
+          )}
         </div>
 
         {/* Loading */}
@@ -217,16 +275,18 @@ export function TasksPage() {
             </div>
           )}
 
-        {/* Back */}
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={handleBackToProjects}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700"
-          >
-            ← Back to projects
-          </button>
-        </div>
+        {/* Back to Projects */}
+        {!isLoading && (
+          <div className="mt-8">
+            <button
+              type="button"
+              onClick={handleBackToProjects}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+              ← Back to projects
+            </button>
+          </div>
+        )}
       </section>
     </main>
   );
