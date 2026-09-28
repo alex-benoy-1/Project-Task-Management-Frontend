@@ -7,7 +7,6 @@ import {
 import {
   Breadcrumbs,
   Button,
-  Card,
 } from "../../../components/ui";
 
 import {
@@ -20,6 +19,8 @@ import {
 
 import type { Project } from "../../projects/types/project.types";
 import type { Task } from "../types/task.types";
+
+import { TaskCard } from "../components/TaskCard";
 
 export function TasksPage() {
   const { projectId } = useParams<{
@@ -67,11 +68,14 @@ export function TasksPage() {
         setError("");
 
         /*
-         * First get the project.
+         * Get the project first.
          *
-         * This gives us:
+         * We need the project information
+         * for:
          * - project name
          * - organization ID
+         * - breadcrumb
+         * - back button
          */
         const projectResponse =
           await getProject(projectId);
@@ -79,8 +83,7 @@ export function TasksPage() {
         setProject(projectResponse);
 
         /*
-         * Then get the tasks belonging
-         * to this project.
+         * Get all tasks for this project.
          */
         const tasksResponse =
           await getProjectTasks(projectId);
@@ -117,11 +120,33 @@ export function TasksPage() {
     );
   };
 
+  /*
+   * Task delete handler
+   *
+   * This currently removes the task from
+   * the UI after TaskCard calls it.
+   *
+   * Once the delete API is connected,
+   * call deleteTask(taskId) here.
+   */
+  const handleTaskDelete = async (
+    taskId: string,
+  ) => {
+    setTasks(
+      (currentTasks) =>
+        currentTasks.filter(
+          (task) => task.id !== taskId,
+        ),
+    );
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
+
       {/* Header */}
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+
           <h1 className="text-xl font-bold text-gray-900">
             Project Manager
           </h1>
@@ -133,13 +158,16 @@ export function TasksPage() {
           >
             Logout
           </button>
+
         </div>
       </header>
 
       {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
+
         {/* Page Heading */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
               Tasks
@@ -160,10 +188,12 @@ export function TasksPage() {
           >
             + Create Task
           </Button>
+
         </div>
 
         {/* Breadcrumbs */}
         <div className="mb-8">
+
           {!isLoading && project ? (
             <Breadcrumbs
               items={[
@@ -177,8 +207,6 @@ export function TasksPage() {
                 },
                 {
                   label: project.name,
-                  // You can make this clickable later
-                  // if you create a project details page.
                 },
                 {
                   label: "Tasks",
@@ -201,6 +229,7 @@ export function TasksPage() {
               ]}
             />
           )}
+
         </div>
 
         {/* Loading */}
@@ -226,6 +255,7 @@ export function TasksPage() {
           !error &&
           tasks.length === 0 && (
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
+
               <h3 className="font-semibold text-gray-900">
                 No tasks yet
               </h3>
@@ -247,6 +277,7 @@ export function TasksPage() {
 
                 Create your first task
               </button>
+
             </div>
           )}
 
@@ -255,29 +286,22 @@ export function TasksPage() {
           !error &&
           tasks.length > 0 && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
               {tasks.map((task) => (
-                <Card key={task.id}>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {task.title}
-                  </h3>
-
-                  <p className="mt-2 text-sm text-gray-600">
-                    {task.description}
-                  </p>
-
-                  <div className="mt-4">
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-700">
-                      {task.status}
-                    </span>
-                  </div>
-                </Card>
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onDelete={handleTaskDelete}
+                />
               ))}
+
             </div>
           )}
 
         {/* Back to Projects */}
         {!isLoading && (
           <div className="mt-8">
+
             <button
               type="button"
               onClick={handleBackToProjects}
@@ -285,8 +309,10 @@ export function TasksPage() {
             >
               ← Back to projects
             </button>
+
           </div>
         )}
+
       </section>
     </main>
   );

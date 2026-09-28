@@ -44,8 +44,28 @@ export function TaskCard({
     }
   };
 
+  const priorityStyles = {
+    low: "bg-green-100 text-green-700",
+    medium: "bg-yellow-100 text-yellow-700",
+    high: "bg-orange-100 text-orange-700",
+    critical: "bg-red-100 text-red-700",
+  };
+
+  const statusStyles = {
+    todo: "bg-gray-100 text-gray-700",
+    in_progress: "bg-blue-100 text-blue-700",
+    completed: "bg-green-100 text-green-700",
+  };
+
+  const priorityStyle =
+    priorityStyles[task.priority];
+
+  const statusStyle =
+    statusStyles[task.status];
+
   return (
     <div className="relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -94,8 +114,10 @@ export function TaskCard({
         )}
       </div>
 
-      {/* Status */}
-      <div className="mt-5">
+      {/* Status + Priority */}
+      <div className="mt-5 flex items-center gap-3">
+
+        {/* Status */}
         <span
           className={`
             inline-flex
@@ -105,20 +127,47 @@ export function TaskCard({
             text-xs
             font-medium
             capitalize
-            ${
-              task.status === "completed"
-                ? "bg-green-100 text-green-700"
-                : task.status === "in_progress"
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-100 text-gray-700"
-            }
+            ${statusStyle}
           `}
         >
-          {task.status.replace(
-            /_/g,
-            " ",
-          )}
+          {task.status.replace(/_/g, " ")}
         </span>
+
+        {/* Priority */}
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium capitalize text-gray-600">
+          <span
+            className={`
+              h-2.5
+              w-2.5
+              rounded-full
+              ${ 
+                task.priority === "low"
+                  ? "bg-green-500"
+                  : task.priority === "medium"
+                    ? "bg-yellow-500"
+                    : task.priority === "high"
+                      ? "bg-orange-500"
+                      : "bg-red-500"
+              }
+            `}
+          />
+
+          {task.priority}
+        </span>
+
+      </div>
+
+      {/* Due Date */}
+      <div className="mt-5">
+        <p className="text-xs text-gray-500">
+          Due date
+        </p>
+
+        <p className="mt-1 text-sm font-medium text-gray-700">
+          {new Date(
+            task.due_date,
+          ).toLocaleDateString()}
+        </p>
       </div>
 
       {/* Footer */}
