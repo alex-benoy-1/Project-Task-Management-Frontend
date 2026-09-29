@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   useNavigate,
   useParams,
@@ -14,18 +15,21 @@ import {
 } from "../../projects/api/projectApi";
 
 import {
+  deleteTask,
   getProjectTasks,
 } from "../api/taskApi";
 
 import type { Project } from "../../projects/types/project.types";
+
 import type { Task } from "../types/task.types";
 
 import { TaskCard } from "../components/TaskCard";
 
 export function TasksPage() {
-  const { projectId } = useParams<{
-    projectId: string;
-  }>();
+  const { projectId } =
+    useParams<{
+      projectId: string;
+    }>();
 
   const navigate = useNavigate();
 
@@ -53,98 +57,105 @@ export function TasksPage() {
   };
 
   /*
-   * Fetch project and tasks
+   * Load project and tasks
    */
   useEffect(() => {
-    const fetchProjectAndTasks = async () => {
-      if (!projectId) {
-        setError("Project ID is missing.");
-        setIsLoading(false);
-        return;
-      }
+    const fetchProjectAndTasks =
+      async () => {
+        if (!projectId) {
+          setError(
+            "Project ID is missing.",
+          );
 
-      try {
-        setIsLoading(true);
-        setError("");
+          setIsLoading(false);
 
-        /*
-         * Get the project first.
-         *
-         * We need the project information
-         * for:
-         * - project name
-         * - organization ID
-         * - breadcrumb
-         * - back button
-         */
-        const projectResponse =
-          await getProject(projectId);
+          return;
+        }
 
-        setProject(projectResponse);
+        try {
+          setIsLoading(true);
+          setError("");
 
-        /*
-         * Get all tasks for this project.
-         */
-        const tasksResponse =
-          await getProjectTasks(projectId);
+          const projectResponse =
+            await getProject(
+              projectId,
+            );
 
-        setTasks(tasksResponse.tasks);
-      } catch (error) {
-        console.error(
-          "Failed to load project tasks:",
-          error,
-        );
+          setProject(
+            projectResponse,
+          );
 
-        setError(
-          "Failed to load tasks. Please try again.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
+          const tasksResponse =
+            await getProjectTasks(
+              projectId,
+            );
+
+          setTasks(
+            tasksResponse.tasks,
+          );
+        } catch (error) {
+          console.error(
+            "Failed to load project tasks:",
+            error,
+          );
+
+          setError(
+            "Failed to load tasks. Please try again.",
+          );
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
     fetchProjectAndTasks();
   }, [projectId]);
 
   /*
-   * Back to projects
-   */
-  const handleBackToProjects = () => {
-    if (!project) {
-      navigate(-1);
-      return;
-    }
-
-    navigate(
-      `/organizations/${project.organization_id}/projects`,
-    );
-  };
-
-  /*
-   * Task delete handler
-   *
-   * This currently removes the task from
-   * the UI after TaskCard calls it.
-   *
-   * Once the delete API is connected,
-   * call deleteTask(taskId) here.
+   * Delete task
    */
   const handleTaskDelete = async (
-    taskId: string,
-  ) => {
-    setTasks(
-      (currentTasks) =>
-        currentTasks.filter(
-          (task) => task.id !== taskId,
-        ),
+  taskId: string,
+) => {
+  try {
+    await deleteTask(taskId);
+
+    setTasks((currentTasks) =>
+      currentTasks.filter(
+        (task) => task.id !== taskId,
+      ),
     );
-  };
+  } catch (error) {
+    console.error(
+      "Failed to delete task:",
+      error,
+    );
+
+    throw error;
+  }
+};
+
+  /*
+   * Back to projects
+   */
+  const handleBackToProjects =
+    () => {
+      if (!project) {
+        navigate(-1);
+
+        return;
+      }
+
+      navigate(
+        `/organizations/${project.organization_id}/projects`,
+      );
+    };
 
   return (
     <main className="min-h-screen bg-gray-50">
 
       {/* Header */}
       <header className="border-b bg-white">
+
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 
           <h1 className="text-xl font-bold text-gray-900">
@@ -153,22 +164,26 @@ export function TasksPage() {
 
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={
+              handleLogout
+            }
             className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
             Logout
           </button>
 
         </div>
+
       </header>
 
       {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
 
-        {/* Page Heading */}
+        {/* Heading */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
           <div>
+
             <h2 className="text-2xl font-bold text-gray-900">
               Tasks
             </h2>
@@ -178,12 +193,14 @@ export function TasksPage() {
                 ? `Manage tasks for ${project.name}.`
                 : "Manage this project's tasks."}
             </p>
+
           </div>
 
           <Button
             type="button"
             onClick={() => {
-              // Create task modal will go here
+              // Create task modal
+              // will be added later.
             }}
           >
             + Create Task
@@ -194,7 +211,8 @@ export function TasksPage() {
         {/* Breadcrumbs */}
         <div className="mb-8">
 
-          {!isLoading && project ? (
+          {!isLoading &&
+          project ? (
             <Breadcrumbs
               items={[
                 {
@@ -206,7 +224,8 @@ export function TasksPage() {
                   href: `/organizations/${project.organization_id}/projects`,
                 },
                 {
-                  label: project.name,
+                  label:
+                    project.name,
                 },
                 {
                   label: "Tasks",
@@ -221,7 +240,8 @@ export function TasksPage() {
                   href: "/",
                 },
                 {
-                  label: "Projects",
+                  label:
+                    "Projects",
                 },
                 {
                   label: "Tasks",
@@ -235,22 +255,27 @@ export function TasksPage() {
         {/* Loading */}
         {isLoading && (
           <div className="rounded-xl border border-gray-200 bg-white p-6">
+
             <p className="text-sm text-gray-500">
               Loading tasks...
             </p>
+
           </div>
         )}
 
         {/* Error */}
-        {!isLoading && error && (
-          <div className="rounded-lg bg-red-50 p-4">
-            <p className="text-sm text-red-600">
-              {error}
-            </p>
-          </div>
-        )}
+        {!isLoading &&
+          error && (
+            <div className="rounded-lg bg-red-50 p-4">
 
-        {/* Empty State */}
+              <p className="text-sm text-red-600">
+                {error}
+              </p>
+
+            </div>
+          )}
+
+        {/* Empty */}
         {!isLoading &&
           !error &&
           tasks.length === 0 && (
@@ -267,15 +292,18 @@ export function TasksPage() {
               <button
                 type="button"
                 onClick={() => {
-                  // Create task modal will go here
+                  // Create task modal
+                  // will be added later.
                 }}
                 className="mt-5 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
+
                 <span className="text-lg leading-none">
                   +
                 </span>
 
                 Create your first task
+
               </button>
 
             </div>
@@ -285,26 +313,37 @@ export function TasksPage() {
         {!isLoading &&
           !error &&
           tasks.length > 0 && (
+
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-              {tasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onDelete={handleTaskDelete}
-                />
-              ))}
+              {tasks.map(
+                (task) => (
+                  <TaskCard
+                    key={
+                      task.id
+                    }
+                    task={
+                      task
+                    }
+                    onDelete={
+                      handleTaskDelete
+                    }
+                  />
+                ),
+              )}
 
             </div>
           )}
 
-        {/* Back to Projects */}
+        {/* Back */}
         {!isLoading && (
           <div className="mt-8">
 
             <button
               type="button"
-              onClick={handleBackToProjects}
+              onClick={
+                handleBackToProjects
+              }
               className="text-sm font-medium text-blue-600 hover:text-blue-700"
             >
               ← Back to projects
