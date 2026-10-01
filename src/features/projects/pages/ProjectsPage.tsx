@@ -194,10 +194,16 @@ export function ProjectsPage() {
       (currentProjects) =>
         currentProjects.filter(
           (project) =>
-            project.projectid !==
-            projectId,
+            project.projectid !== projectId,
         ),
     );
+  };
+
+  /*
+   * Back to organizations
+   */
+  const handleBackToOrganizations = () => {
+    navigate("/");
   };
 
   return (
@@ -322,13 +328,24 @@ export function ProjectsPage() {
                 <ProjectCard
                   key={project.projectid}
                   project={project}
-                  onDelete={
-                    handleProjectDelete
-                  }
+                  onDelete={handleProjectDelete}
                 />
               ))}
             </div>
           )}
+
+        {/* Back to Organizations */}
+        {!isLoading && (
+          <div className="mt-8">
+            <button
+              type="button"
+              onClick={handleBackToOrganizations}
+              className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+            >
+              ← Back to organizations
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Create Project Modal */}

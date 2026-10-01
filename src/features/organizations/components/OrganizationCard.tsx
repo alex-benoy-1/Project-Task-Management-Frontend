@@ -13,10 +13,14 @@ export function OrganizationCard({
   organization,
   onDelete,
 }: OrganizationCardProps) {
-  const [showOptions, setShowOptions] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [showOptions, setShowOptions] =
+    useState(false);
 
-  const canDelete = organization.role === "admin";
+  const [isDeleting, setIsDeleting] =
+    useState(false);
+
+  const canDelete =
+    organization.role === "admin";
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
@@ -30,7 +34,9 @@ export function OrganizationCard({
     try {
       setIsDeleting(true);
 
-      await deleteOrganization(organization.id);
+      await deleteOrganization(
+        organization.id,
+      );
 
       onDelete(organization.id);
     } catch (error) {
@@ -49,25 +55,38 @@ export function OrganizationCard({
   };
 
   return (
-    <div className="relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+    <div className="relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+
+      {/* Header */}
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+
+        {/* Organization information */}
+        <div className="min-w-0">
+
+          <h3 className="truncate text-lg font-semibold text-gray-900">
             {organization.name}
           </h3>
+
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Role + Options */}
+        <div className="flex shrink-0 items-center gap-2">
+
+          {/* Role */}
           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-700">
             {organization.role}
           </span>
 
+          {/* Options */}
           {canDelete && (
             <div className="relative">
+
               <button
                 type="button"
                 onClick={() =>
-                  setShowOptions((previous) => !previous)
+                  setShowOptions(
+                    (previous) => !previous,
+                  )
                 }
                 className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                 aria-label="Organization options"
@@ -78,6 +97,7 @@ export function OrganizationCard({
 
               {showOptions && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-36 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+
                   <button
                     type="button"
                     onClick={handleDelete}
@@ -88,25 +108,49 @@ export function OrganizationCard({
                       ? "Deleting..."
                       : "Delete"}
                   </button>
+
                 </div>
               )}
+
             </div>
           )}
+
         </div>
+
       </div>
 
-      <Link
-        to={`/organizations/${organization.id}/projects`}
-        state={{
-          organizationRole: organization.role,
-          organizationName: organization.name,
-        }}
-        className="block"
-      >
-        <p className="mt-5 text-sm font-medium text-blue-600">
-          View projects →
-        </p>
-      </Link>
+      {/* Footer / Action */}
+      <div className="mt-auto pt-6">
+
+        <div className="border-t pt-4">
+
+          <Link
+            to={`/organizations/${organization.id}/projects`}
+            state={{
+              organizationRole:
+                organization.role,
+              organizationName:
+                organization.name,
+            }}
+            className="inline-flex items-center text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+          >
+            View projects
+            <span className="ml-1">
+              →
+            </span>
+          </Link>
+
+          <p className="mt-3 text-xs text-gray-500">
+            Joined{" "}
+            {new Date(
+              organization.joined_at,
+            ).toLocaleDateString()}
+          </p>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }

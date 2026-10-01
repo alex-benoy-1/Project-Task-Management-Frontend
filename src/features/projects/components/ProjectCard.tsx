@@ -26,20 +26,18 @@ export function ProjectCard({
     project.role === "admin" ||
     project.role === "manager";
 
-  const canEdit = project.role === "owner";
+  const canEdit =
+    project.role === "owner";
 
-  const canDelete = project.role === "owner";
+  const canDelete =
+    project.role === "owner";
 
   const handleEdit = () => {
-  navigate(
-    `/projects/${project.projectid}/edit`,
-    {
-      state: {
-        organizationRole: project.role,
-      },
-    },
-  );
+    setShowOptions(false);
 
+    navigate(
+      `/projects/${project.projectid}/edit`,
+    );
   };
 
   const handleDelete = async () => {
@@ -54,7 +52,9 @@ export function ProjectCard({
     try {
       setIsDeleting(true);
 
-      await deleteProject(project.projectid);
+      await deleteProject(
+        project.projectid,
+      );
 
       onDelete(project.projectid);
     } catch (error) {
@@ -73,20 +73,26 @@ export function ProjectCard({
   };
 
   return (
-    <div className="relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+    <div className="relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+
+      {/* Header */}
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">
+
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold text-gray-900">
             {project.name}
           </h2>
 
-          <p className="mt-2 text-sm text-gray-600">
-            {project.description}
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">
+            {project.description ||
+              "No description provided."}
           </p>
         </div>
 
+        {/* Options */}
         {canShowOptions && (
-          <div className="relative">
+          <div className="relative shrink-0">
+
             <button
               type="button"
               onClick={() =>
@@ -103,6 +109,7 @@ export function ProjectCard({
 
             {showOptions && (
               <div className="absolute right-0 z-10 mt-2 w-36 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+
                 {canEdit && (
                   <button
                     type="button"
@@ -125,25 +132,48 @@ export function ProjectCard({
                       : "Delete"}
                   </button>
                 )}
+
               </div>
             )}
+
           </div>
         )}
+
       </div>
 
-      <div className="mt-5 border-t pt-4">
-        <Link
-          to={`/projects/${project.projectid}/tasks`}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700"
-        >
-          View tasks →
-        </Link>
-
-        <p className="mt-2 text-xs text-gray-500">
-          Created:{" "}
-          {new Date(project.created_at).toLocaleDateString()}
-        </p>
+      {/* Role */}
+      <div className="mt-4">
+        <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-700">
+          {project.role}
+        </span>
       </div>
+
+      {/* Footer */}
+      <div className="mt-auto pt-6">
+
+        <div className="border-t pt-4">
+
+          <Link
+            to={`/projects/${project.projectid}/tasks`}
+            className="inline-flex items-center text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+          >
+            View tasks
+            <span className="ml-1">
+              →
+            </span>
+          </Link>
+
+          <p className="mt-3 text-xs text-gray-500">
+            Created{" "}
+            {new Date(
+              project.created_at,
+            ).toLocaleDateString()}
+          </p>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }
