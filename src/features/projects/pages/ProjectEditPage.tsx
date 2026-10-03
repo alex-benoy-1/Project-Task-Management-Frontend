@@ -7,6 +7,7 @@ import {
 
 import {
   Breadcrumbs,
+  Button,
   Card,
 } from "../../../components/ui";
 
@@ -51,7 +52,23 @@ export function ProjectEditPage() {
   const [submitError, setSubmitError] =
     useState<string | null>(null);
 
+  /*
+   * Logout
+   */
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
+
+  /*
+   * Load project
+   */
   useEffect(() => {
+    let isMounted = true;
+
     const loadProject = async () => {
       if (!projectId) {
         setError("Project ID is missing.");
@@ -63,27 +80,59 @@ export function ProjectEditPage() {
         setIsLoading(true);
         setError(null);
 
-        const response =
-          await getProject(projectId);
+        const response = await getProject(projectId);
 
-        setProject(response);
+        if (isMounted) {
+          setProject(response);
+        }
       } catch (error) {
         console.error(
           "Failed to load project:",
           error,
         );
 
-        setError(
-          "Failed to load project. Please try again.",
-        );
+        if (isMounted) {
+          setError(
+            "Failed to load project. Please try again.",
+          );
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadProject();
+
+    return () => {
+      isMounted = false;
+    };
   }, [projectId]);
 
+  /*
+   * Navigate to projects
+   */
+  const navigateToProjects = (
+    organizationId: string,
+  ) => {
+    navigate(
+      `/organizations/${organizationId}/projects`,
+      {
+        state: {
+          organizationRole:
+            locationState?.organizationRole,
+
+          organizationName:
+            locationState?.organizationName,
+        },
+      },
+    );
+  };
+
+  /*
+   * Update project
+   */
   const handleSubmit = async (
     data: ProjectFormData,
   ) => {
@@ -96,27 +145,18 @@ export function ProjectEditPage() {
       setIsSubmitting(true);
       setSubmitError(null);
 
-      const updatedProject =
-        await updateProject(projectId, {
-          name: data.name,
-          description: data.description,
-        });
+      const updatedProject = await updateProject(
+        projectId,
+        {
+          name: data.name.trim(),
+          description: data.description.trim(),
+        },
+      );
 
       setProject(updatedProject);
 
-      navigate(
-        `/organizations/${updatedProject.organization_id}/projects`,
-        {
-          state: {
-            organizationRole:
-              locationState?.organizationRole ??
-              updatedProject.role,
-
-            organizationName:
-              locationState?.organizationName ??
-              "Organization",
-          },
-        },
+      navigateToProjects(
+        updatedProject.organization_id,
       );
     } catch (error) {
       console.error(
@@ -132,45 +172,83 @@ export function ProjectEditPage() {
     }
   };
 
+  /*
+   * Cancel editing
+   */
   const handleCancel = () => {
-    if (project) {
-      navigate(
-        `/organizations/${project.organization_id}/projects`,
-        {
-          state: {
-            organizationRole:
-              locationState?.organizationRole ??
-              project.role,
+    if (isSubmitting) {
+      return;
+    }
 
-            organizationName:
-              locationState?.organizationName ??
-              "Organization",
-          },
-        },
+    if (project) {
+      navigateToProjects(
+        project.organization_id,
       );
     } else {
       navigate(-1);
     }
   };
 
+  /*
+   * Loading state
+   */
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50 p-6">
-        <div className="mx-auto max-w-3xl">
-          <div className="flex min-h-[300px] items-center justify-center">
+      <main className="min-h-screen bg-gray-50">
+        <header className="border-b bg-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <h1 className="text-xl font-bold text-gray-900">
+              Project Manager
+            </h1>
+
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </header>
+
+        <section className="mx-auto max-w-3xl px-6 py-12">
+          <div
+            className="flex min-h-[300px] items-center justify-center"
+            role="status"
+            aria-live="polite"
+          >
             <p className="text-sm text-gray-500">
               Loading project...
             </p>
           </div>
-        </div>
+        </section>
       </main>
     );
   }
 
+  /*
+   * Error state
+   */
   if (error || !project) {
     return (
-      <main className="min-h-screen bg-gray-50 p-6">
-        <div className="mx-auto max-w-3xl">
+      <main className="min-h-screen bg-gray-50">
+        <header className="border-b bg-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <h1 className="text-xl font-bold text-gray-900">
+              Project Manager
+            </h1>
+
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </header>
+
+        <section className="mx-auto max-w-3xl px-6 py-10">
           <Breadcrumbs
             items={[
               {
@@ -184,80 +262,126 @@ export function ProjectEditPage() {
           />
 
           <Card>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-900">
               Unable to load project
-            </h1>
+            </h2>
 
             <p className="mt-2 text-sm text-red-600">
-              {error ??
-                "Project could not be found."}
+              {error ?? "Project could not be found."}
             </p>
 
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="mt-5 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-            >
-              Go back
-            </button>
+            <div className="mt-6">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate(-1)}
+              >
+                Go back
+              </Button>
+            </div>
           </Card>
-        </div>
+        </section>
       </main>
     );
   }
 
+  /*
+   * Main page
+   */
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-3xl">
-        <Breadcrumbs
-          items={[
-            {
-              label: "Home",
-              href: "/",
-            },
-            {
-              label: "Projects",
-              href: `/organizations/${project.organization_id}/projects`,
-            },
-            {
-              label: project.name,
-            },
-            {
-              label: "Edit",
-            },
-          ]}
-        />
+    <main className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="border-b bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <h1 className="text-xl font-bold text-gray-900">
+            Project Manager
+          </h1>
 
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleLogout}
+            disabled={isSubmitting}
+          >
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      {/* Content */}
+      <section className="mx-auto max-w-3xl px-6 py-10">
+        {/* Breadcrumbs */}
+        <div className="mb-8">
+          <Breadcrumbs
+            items={[
+              {
+                label: "Home",
+                href: "/",
+              },
+              {
+                label:
+                  locationState?.organizationName ??
+                  "Projects",
+                href: `/organizations/${project.organization_id}/projects`,
+              },
+              {
+                label: project.name,
+              },
+              {
+                label: "Edit",
+              },
+            ]}
+          />
+        </div>
+
+        {/* Edit Project Card */}
         <Card>
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Edit Project
-            </h1>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Edit project
+            </h2>
 
-            <p className="mt-1 text-sm text-gray-600">
-              Update the project name and description.
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              Update your project name and description.
             </p>
           </div>
 
+          {/* Submission Error */}
           {submitError && (
-            <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3">
+            <div
+              className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3"
+              role="alert"
+            >
               <p className="text-sm text-red-600">
                 {submitError}
               </p>
             </div>
           )}
 
+          {/* Form */}
           <ProjectEditForm
             defaultValues={{
               name: project.name,
-              description: project.description,
+              description: project.description ?? "",
             }}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isSubmitting={isSubmitting}
           />
         </Card>
-      </div>
+
+        {/* Back to Projects */}
+        <div className="mt-8">
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            ← Back to projects
+          </button>
+        </div>
+      </section>
     </main>
   );
 }
