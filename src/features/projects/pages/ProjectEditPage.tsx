@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -66,69 +66,61 @@ export function ProjectEditPage() {
   /*
    * Load project
    */
-  useEffect(() => {
-    let isMounted = true;
+  const loadProject = useCallback(async () => {
+    if (!projectId) {
+      setError("Project ID is missing.");
+      setIsLoading(false);
+      return;
+    }
 
-    const loadProject = async () => {
-      if (!projectId) {
-        setError("Project ID is missing.");
-        setIsLoading(false);
-        return;
-      }
+    try {
+      setIsLoading(true);
+      setError(null);
 
-      try {
-        setIsLoading(true);
-        setError(null);
+      const response = await getProject(projectId);
 
-        const response = await getProject(projectId);
+      setProject(response);
+    } catch (error) {
+      console.error(
+        "Failed to load project:",
+        error,
+      );
 
-        if (isMounted) {
-          setProject(response);
-        }
-      } catch (error) {
-        console.error(
-          "Failed to load project:",
-          error,
-        );
-
-        if (isMounted) {
-          setError(
-            "Failed to load project. Please try again.",
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadProject();
-
-    return () => {
-      isMounted = false;
-    };
+      setError(
+        "Failed to load project. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [projectId]);
 
-  /*
-   * Navigate to projects
-   */
-  const navigateToProjects = (
-    organizationId: string,
-  ) => {
-    navigate(
-      `/organizations/${organizationId}/projects`,
-      {
-        state: {
-          organizationRole:
-            locationState?.organizationRole,
+  useEffect(() => {
+    void loadProject();
+  }, [loadProject]);
 
-          organizationName:
-            locationState?.organizationName,
+  /*
+   * Navigate back to projects
+   *
+   * We use the organization_id from the
+   * project returned by the backend.
+   */
+  const navigateToProjects = useCallback(
+    (organizationId: string) => {
+      navigate(
+        `/organizations/${organizationId}/projects`,
+        {
+          state: {
+            organizationRole:
+              locationState?.organizationRole,
+
+            organizationName:
+              locationState?.organizationName,
+          },
         },
-      },
-    );
-  };
+      );
+    },
+    [navigate, locationState],
+  );
 
   /*
    * Update project
@@ -184,9 +176,11 @@ export function ProjectEditPage() {
       navigateToProjects(
         project.organization_id,
       );
-    } else {
-      navigate(-1);
+
+      return;
     }
+
+    navigate(-1);
   };
 
   /*
@@ -195,11 +189,15 @@ export function ProjectEditPage() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-gray-50">
-        <header className="border-b bg-white">
+        <header className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <h1 className="text-xl font-bold text-gray-900">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="text-xl font-bold text-gray-900 transition hover:text-gray-700"
+            >
               Project Manager
-            </h1>
+            </button>
 
             <Button
               type="button"
@@ -212,15 +210,42 @@ export function ProjectEditPage() {
         </header>
 
         <section className="mx-auto max-w-3xl px-6 py-12">
-          <div
-            className="flex min-h-[300px] items-center justify-center"
-            role="status"
-            aria-live="polite"
-          >
-            <p className="text-sm text-gray-500">
-              Loading project...
-            </p>
+          <div className="mb-8">
+            <Breadcrumbs
+              items={[
+                {
+                  label: "Home",
+                  href: "/",
+                },
+                {
+                  label: "Projects",
+                },
+                {
+                  label: "Edit",
+                },
+              ]}
+            />
           </div>
+
+          <Card>
+            <div
+              className="flex min-h-[280px] items-center justify-center"
+              role="status"
+              aria-live="polite"
+            >
+              <div className="text-center">
+                <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+
+                <p className="text-sm font-medium text-gray-700">
+                  Loading project...
+                </p>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Please wait while we load the project details.
+                </p>
+              </div>
+            </div>
+          </Card>
         </section>
       </main>
     );
@@ -232,11 +257,15 @@ export function ProjectEditPage() {
   if (error || !project) {
     return (
       <main className="min-h-screen bg-gray-50">
-        <header className="border-b bg-white">
+        <header className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <h1 className="text-xl font-bold text-gray-900">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="text-xl font-bold text-gray-900 transition hover:text-gray-700"
+            >
               Project Manager
-            </h1>
+            </button>
 
             <Button
               type="button"
@@ -249,35 +278,56 @@ export function ProjectEditPage() {
         </header>
 
         <section className="mx-auto max-w-3xl px-6 py-10">
-          <Breadcrumbs
-            items={[
-              {
-                label: "Home",
-                href: "/",
-              },
-              {
-                label: "Project",
-              },
-            ]}
-          />
+          <div className="mb-8">
+            <Breadcrumbs
+              items={[
+                {
+                  label: "Home",
+                  href: "/",
+                },
+                {
+                  label: "Project",
+                },
+              ]}
+            />
+          </div>
 
           <Card>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Unable to load project
-            </h2>
+            <div className="text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <span
+                  className="text-xl font-bold text-red-600"
+                  aria-hidden="true"
+                >
+                  !
+                </span>
+              </div>
 
-            <p className="mt-2 text-sm text-red-600">
-              {error ?? "Project could not be found."}
-            </p>
+              <h2 className="mt-4 text-xl font-semibold text-gray-900">
+                Unable to load project
+              </h2>
 
-            <div className="mt-6">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate(-1)}
-              >
-                Go back
-              </Button>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-600">
+                {error ??
+                  "The requested project could not be found."}
+              </p>
+
+              <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                <Button
+                  type="button"
+                  onClick={() => void loadProject()}
+                >
+                  Try again
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => navigate(-1)}
+                >
+                  Go back
+                </Button>
+              </div>
             </div>
           </Card>
         </section>
@@ -291,11 +341,15 @@ export function ProjectEditPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b bg-white">
+      <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-bold text-gray-900">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="text-xl font-bold text-gray-900 transition hover:text-gray-700"
+          >
             Project Manager
-          </h1>
+          </button>
 
           <Button
             type="button"
@@ -334,27 +388,84 @@ export function ProjectEditPage() {
           />
         </div>
 
-        {/* Edit Project Card */}
+        {/* Page heading */}
+        <div className="mb-8">
+          <p className="text-sm font-medium text-blue-600">
+            Project settings
+          </p>
+
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-gray-900">
+            Edit project
+          </h1>
+
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            Update the name and description of your project.
+          </p>
+        </div>
+
+        {/* Project context */}
+        <Card className="mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Current project
+              </p>
+
+              <h2 className="mt-1 truncate text-lg font-semibold text-gray-900">
+                {project.name}
+              </h2>
+
+              {project.description && (
+                <p className="mt-1 line-clamp-2 text-sm text-gray-600">
+                  {project.description}
+                </p>
+              )}
+            </div>
+
+            <div className="shrink-0">
+              <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-700">
+                {project.role}
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Edit form */}
         <Card>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Edit project
+            <h2 className="text-xl font-semibold text-gray-900">
+              Project details
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-gray-600">
-              Update your project name and description.
+              Make your changes below. Your updates will be
+              saved when you submit the form.
             </p>
           </div>
 
-          {/* Submission Error */}
+          {/* Submission error */}
           {submitError && (
             <div
-              className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3"
+              className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
               role="alert"
             >
-              <p className="text-sm text-red-600">
-                {submitError}
-              </p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100">
+                  <span className="text-xs font-bold text-red-600">
+                    !
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-red-800">
+                    Unable to save changes
+                  </p>
+
+                  <p className="mt-1 text-sm text-red-600">
+                    {submitError}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -362,7 +473,8 @@ export function ProjectEditPage() {
           <ProjectEditForm
             defaultValues={{
               name: project.name,
-              description: project.description ?? "",
+              description:
+                project.description ?? "",
             }}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
@@ -370,7 +482,7 @@ export function ProjectEditPage() {
           />
         </Card>
 
-        {/* Back to Projects */}
+        {/* Back to projects */}
         <div className="mt-8">
           <button
             type="button"
