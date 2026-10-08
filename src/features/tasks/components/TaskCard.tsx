@@ -16,6 +16,13 @@ export function TaskCard({
   const [isDeleting, setIsDeleting] =
     useState(false);
 
+  /*
+   * Mark complete - visual only
+   */
+  const handleMarkComplete = () => {
+    setShowOptions(false);
+  };
+
   const handleDelete = async () => {
     if (!onDelete) {
       return;
@@ -80,9 +87,6 @@ export function TaskCard({
 
   /*
    * Format due date.
-   *
-   * Example:
-   * Oct 5, 2026
    */
   const formattedDueDate =
     new Date(
@@ -129,8 +133,20 @@ export function TaskCard({
             </button>
 
             {showOptions && (
-              <div className="absolute right-0 z-10 mt-2 w-36 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 z-10 mt-2 w-40 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
 
+                {/* Mark complete */}
+                {task.status !== "completed" && (
+                  <button
+                    type="button"
+                    onClick={handleMarkComplete}
+                    className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50"
+                  >
+                    ✓ Mark complete
+                  </button>
+                )}
+
+                {/* Delete */}
                 <button
                   type="button"
                   onClick={handleDelete}
@@ -144,6 +160,7 @@ export function TaskCard({
 
               </div>
             )}
+
           </div>
         )}
 
